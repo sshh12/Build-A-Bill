@@ -1,4 +1,4 @@
-# Build-A-Bill
+# Build A Bill
 
 Creating Legislation with AI
 

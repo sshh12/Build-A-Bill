@@ -103,3 +103,4 @@ ENV/
 
 # Build A Bill
 makepython.bat
+*.bill
