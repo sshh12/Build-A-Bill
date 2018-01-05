@@ -1,13 +1,14 @@
 
 # coding: utf-8
 
-# In[17]:
+# In[1]:
 
 # Imports
 import numpy as np
 import random
 import os
 
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Activation, LSTM, TimeDistributed, Dropout
 from keras.optimizers import RMSprop
 from keras.models import Sequential
@@ -15,7 +16,7 @@ from keras.models import Sequential
 import matplotlib.pyplot as plt
 
 
-# In[18]:
+# In[2]:
 
 # Parameters
 
@@ -25,7 +26,7 @@ epochs = 60
 batch_size = 256
 
 
-# In[19]:
+# In[3]:
 
 
 def get_bills(nb_bills=12, mix=True):
@@ -41,7 +42,7 @@ def get_bills(nb_bills=12, mix=True):
         return all_bills[:nb_bills]
 
 
-# In[20]:
+# In[4]:
 
 # Load Data
 
@@ -72,7 +73,7 @@ def load_data(bills, max_length=max_length, step=1):
     return (sequences, next_chars), (len(chars), chr_to_int, int_to_chr)
 
 
-# In[21]:
+# In[5]:
 
 # Process Data
 
@@ -92,7 +93,7 @@ def process_data(sequences, next_chars, num_chars, chr_to_int):
     return X, y
 
 
-# In[22]:
+# In[6]:
 
 # Get Model
 
@@ -119,7 +120,7 @@ def get_model(num_chars, max_length=max_length):
     
 
 
-# In[23]:
+# In[7]:
 
 
 def sample(preds, temperature=1.0):
@@ -135,7 +136,7 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-# In[26]:
+# In[ ]:
 
 # (Run) Load Data
 
@@ -150,7 +151,7 @@ if __name__ == "__main__":
     print(X.shape, y.shape)
 
 
-# In[8]:
+# In[ ]:
 
 # (Run) Train
 
@@ -158,12 +159,17 @@ if __name__ == "__main__":
     
     model = get_model(num_chars)
     
+    checkpoint = ModelCheckpoint(os.path.join('..', 'models', 'bill-gen.h5'), 
+                                 monitor='loss',
+                                 verbose=0,
+                                 save_best_only=True)
+    
     history = model.fit(X, y,
                         batch_size=batch_size,
                         epochs=epochs,
                         validation_split=.1,
                         verbose=1,
-                        callbacks=[])
+                        callbacks=[checkpoint])
     
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -171,7 +177,7 @@ if __name__ == "__main__":
     plt.show()
 
 
-# In[11]:
+# In[ ]:
 
 
 def generate_bill():
@@ -204,7 +210,7 @@ def generate_bill():
 
 
 
-# In[12]:
+# In[ ]:
 
 
 if __name__ == "__main__":
