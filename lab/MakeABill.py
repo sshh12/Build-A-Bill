@@ -11,7 +11,7 @@ import os
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Activation, LSTM, TimeDistributed, Dropout
 from keras.optimizers import RMSprop
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 
 import matplotlib.pyplot as plt
 
@@ -22,14 +22,14 @@ import matplotlib.pyplot as plt
 
 max_length = 120
 
-epochs = 60
+epochs = 100
 batch_size = 256
 
 
 # In[3]:
 
 
-def get_bills(nb_bills=12, mix=True):
+def get_bills(nb_bills=24, mix=True):
     
     all_bills = os.listdir(os.path.join('..', 'data'))
     
@@ -114,7 +114,7 @@ def get_model(num_chars, max_length=max_length):
 
     model.add(Activation('softmax'))
     
-    model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.002))
+    model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001))
     
     return model
     
@@ -159,17 +159,22 @@ if __name__ == "__main__":
     
     model = get_model(num_chars)
     
-    checkpoint = ModelCheckpoint(os.path.join('..', 'models', 'bill-gen.h5'), 
-                                 monitor='loss',
-                                 verbose=0,
-                                 save_best_only=True)
+    save1 = ModelCheckpoint(os.path.join('..', 'models', 'bill-gen.h5'), # This will prob be overfit but could still be useful
+                            monitor='loss',
+                            verbose=0,
+                            save_best_only=True)
+    
+    save2 = ModelCheckpoint(os.path.join('..', 'models', 'bill-gen2.h5'), 
+                            monitor='val_loss',
+                            verbose=0,
+                            save_best_only=True)
     
     history = model.fit(X, y,
                         batch_size=batch_size,
                         epochs=epochs,
                         validation_split=.1,
                         verbose=1,
-                        callbacks=[checkpoint])
+                        callbacks=[save1, save2])
     
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -181,10 +186,12 @@ if __name__ == "__main__":
 
 
 def generate_bill():
+    
+    model = load_model(os.path.join('..', 'models', 'bill-gen.h5'))
 
-    bill_fn = random.choice(os.path.join('..', 'data'))
+    bill_fn = random.choice(os.listdir(os.path.join('..', 'data')))
 
-    with open(os.path.join('data', bill_fn), 'r') as bill_file:
+    with open(os.path.join('..', 'data', bill_fn), 'r') as bill_file:
         rand_bill = bill_file.read()
 
     new_bill = rand_bill[:max_length]
@@ -195,7 +202,7 @@ def generate_bill():
         X = np.zeros((1, max_length, num_chars))
 
         for t, char in enumerate(new_bill[-max_length:]):
-            X[0, t, chr_to_int[char]] = 1.
+            X[0, t, chr_to_int[char]] = 1
 
         preds = model.predict(X, verbose=0)[0]
         next_index = sample(preds, .9)
