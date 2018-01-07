@@ -136,7 +136,7 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-# In[ ]:
+# In[8]:
 
 # (Run) Load Data
 
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     print(X.shape, y.shape)
 
 
-# In[ ]:
+# In[9]:
 
 # (Run) Train
 
@@ -182,12 +182,12 @@ if __name__ == "__main__":
     plt.show()
 
 
-# In[ ]:
+# In[14]:
 
 
 def generate_bill():
     
-    model = load_model(os.path.join('..', 'models', 'bill-gen.h5'))
+    model = load_model(os.path.join('..', 'models', 'bill-gen2.h5'))
 
     bill_fn = random.choice(os.listdir(os.path.join('..', 'data')))
 
@@ -205,7 +205,7 @@ def generate_bill():
             X[0, t, chr_to_int[char]] = 1
 
         preds = model.predict(X, verbose=0)[0]
-        next_index = sample(preds, .9)
+        next_index = sample(preds, .6)
 
         if int_to_chr[next_index] != '*END*' or "body" == new_bill[-4:]:
             new_bill += int_to_chr[next_index]
@@ -217,7 +217,7 @@ def generate_bill():
 
 
 
-# In[ ]:
+# In[15]:
 
 
 if __name__ == "__main__":
