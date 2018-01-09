@@ -6,6 +6,7 @@
 # Imports
 import numpy as np
 import random
+import pickle
 import os
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
@@ -16,7 +17,7 @@ from keras.models import Sequential, load_model
 import matplotlib.pyplot as plt
 
 
-# In[2]:
+# In[3]:
 
 # Parameters
 
@@ -26,7 +27,7 @@ epochs = 100
 batch_size = 256
 
 
-# In[3]:
+# In[4]:
 
 
 def get_bills(nb_bills=24, mix=True):
@@ -42,7 +43,7 @@ def get_bills(nb_bills=24, mix=True):
         return all_bills[:nb_bills]
 
 
-# In[4]:
+# In[5]:
 
 # Load Data
 
@@ -73,7 +74,7 @@ def load_data(bills, max_length=max_length, step=1):
     return (sequences, next_chars), (len(chars), chr_to_int, int_to_chr)
 
 
-# In[5]:
+# In[6]:
 
 # Process Data
 
@@ -93,7 +94,7 @@ def process_data(sequences, next_chars, num_chars, chr_to_int):
     return X, y
 
 
-# In[6]:
+# In[7]:
 
 # Get Model
 
@@ -120,7 +121,7 @@ def get_model(num_chars, max_length=max_length):
     
 
 
-# In[7]:
+# In[8]:
 
 
 def sample(preds, temperature=1.0):
@@ -136,7 +137,7 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 
-# In[8]:
+# In[9]:
 
 # (Run) Load Data
 
@@ -145,6 +146,9 @@ if __name__ == "__main__":
     bills = get_bills()
     
     (sequences, next_chars), (num_chars, chr_to_int, int_to_chr) = load_data(bills)
+    
+    with open(os.path.join('..', 'models', 'char-table.pickle'), 'wb') as table_file:
+        pickle.dump(chr_to_int, table_file)
     
     X, y = process_data(sequences, next_chars, num_chars, chr_to_int)
     

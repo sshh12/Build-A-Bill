@@ -21,3 +21,7 @@ This converts bills into trainable data and then trains an LSTM to predict/gener
 ##### BuildBills
 
 This experiments with different text generation settings.
+
+##### tests/
+
+Folder contains several generated bills.
